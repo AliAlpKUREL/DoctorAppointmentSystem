@@ -1,0 +1,85 @@
+﻿@page "/login"
+@page "/"
+@inject NavigationManager Navigation
+@inject DoctorService DoctorService
+@inject PharmacyService PharmyService
+@inject ILocalStorageService LocalStorage
+@inject IToastService ToastService
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%;">
+        <h3 class="text-center mb-4">Giriş Yap</h3>
+
+        <div class="mb-3">
+            <label for="role" class="form-label">Kullanıcı Türü</label>
+            <select id="role" class="form-select" @bind="UserRole">
+                <option value="Doctor">Doktor</option>
+                <option value="Pharmacist">Eczacı</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Kullanıcı Adı</label>
+            <input type="text" id="username" class="form-control" @bind="email" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Şifre</label>
+            <input type="password" id="password" class="form-control" @bind="password" required />
+        </div>
+
+        <button class="btn btn-primary w-100" @onclick="LoginAsync">Giriş Yap</button>
+
+    </div>
+</div>
+
+@code {
+    private string UserRole = "Doctor";
+    private string email = string.Empty;
+    private string password = string.Empty;
+
+    private async Task LoginAsync()
+    {
+        var loginModel = new LoginModel
+            {
+                Email = email,
+                Password = password
+            };
+
+        try
+        {
+            if (UserRole == "Doctor")
+            {
+                var token = await DoctorService.LoginAsync(loginModel);
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await LocalStorage.SetItemAsync("authToken", token);
+                    Navigation.NavigateTo("/doctor");
+                }
+                else
+                {
+                    ToastService.ShowError("Giriş başarısız. Lütfen tekrar deneyin.");
+                }
+            }
+            else if (UserRole == "Pharmacist")
+            {
+                var token = await PharmyService.LoginAsync(loginModel);
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await LocalStorage.SetItemAsync("authToken", token);
+                    Navigation.NavigateTo("/pharmacy");
+                }
+                else
+                {
+                    ToastService.ShowError("Giriş başarısız. Lütfen tekrar deneyin.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Bir hata oluştu: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.Model", "DoctorAppointmentSystem.Model\DoctorAppointmentSystem.Model.csproj", "{84ACBC33-627D-4672-994B-709CF9F56A5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.API", "DoctorAppointmentSystem.API\DoctorAppointmentSystem.API.csproj", "{A012804F-88DC-4919-9531-711581AD9825}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.Service", "DoctorAppointmentSystem.Service\DoctorAppointmentSystem.Service.csproj", "{563CEDC2-06F1-4B20-A528-1B87C8DD8E07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.Common", "DoctorAppointmentSystem.Common\DoctorAppointmentSystem.Common.csproj", "{30BA2A92-1644-4AE9-B34F-C80962931528}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.WorkerService", "DoctorAppointmentSystem.WorkerService\DoctorAppointmentSystem.WorkerService.csproj", "{443DC056-C798-4BBD-9F24-43D7139C71C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.EmailWorkerService", "DoctorAppointmentSystem.EmailWorkerService\DoctorAppointmentSystem.EmailWorkerService.csproj", "{928C84AE-C493-4D14-AC99-DB1FACB2FFF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorAppointmentSystem.Blazor", "DoctorAppointmentSystem.Blazor\DoctorAppointmentSystem.Blazor.csproj", "{A30C24CA-CDFF-46D8-A206-C32557F6C5CD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84ACBC33-627D-4672-994B-709CF9F56A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84ACBC33-627D-4672-994B-709CF9F56A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84ACBC33-627D-4672-994B-709CF9F56A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84ACBC33-627D-4672-994B-709CF9F56A5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A012804F-88DC-4919-9531-711581AD9825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A012804F-88DC-4919-9531-711581AD9825}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A012804F-88DC-4919-9531-711581AD9825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A012804F-88DC-4919-9531-711581AD9825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{563CEDC2-06F1-4B20-A528-1B87C8DD8E07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{563CEDC2-06F1-4B20-A528-1B87C8DD8E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{563CEDC2-06F1-4B20-A528-1B87C8DD8E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{563CEDC2-06F1-4B20-A528-1B87C8DD8E07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30BA2A92-1644-4AE9-B34F-C80962931528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30BA2A92-1644-4AE9-B34F-C80962931528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30BA2A92-1644-4AE9-B34F-C80962931528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30BA2A92-1644-4AE9-B34F-C80962931528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{443DC056-C798-4BBD-9F24-43D7139C71C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{443DC056-C798-4BBD-9F24-43D7139C71C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{443DC056-C798-4BBD-9F24-43D7139C71C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{443DC056-C798-4BBD-9F24-43D7139C71C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{928C84AE-C493-4D14-AC99-DB1FACB2FFF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{928C84AE-C493-4D14-AC99-DB1FACB2FFF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{928C84AE-C493-4D14-AC99-DB1FACB2FFF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{928C84AE-C493-4D14-AC99-DB1FACB2FFF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A30C24CA-CDFF-46D8-A206-C32557F6C5CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A30C24CA-CDFF-46D8-A206-C32557F6C5CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A30C24CA-CDFF-46D8-A206-C32557F6C5CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A30C24CA-CDFF-46D8-A206-C32557F6C5CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

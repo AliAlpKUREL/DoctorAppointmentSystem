@@ -1,0 +1,158 @@
+﻿@page "/pharmacy"
+
+@using MongoDB.Bson
+@inject ILocalStorageService LocalStorage
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject PharmacyService PharmacyService
+@inject PatientService PatientService
+@inject PrescriptionService PrescriptionService
+@inject MedicineService MedicineService
+
+<div class="container mt-4">
+    <h3 class="text-primary">Merhaba Eczaneci @ByPharmacy.Name,</h3>
+
+    <h2 class="my-4 text-info">Reçete Yolla</h2>
+    @if (isLoggedIn)
+    { 
+        <div class="card p-4 shadow-sm border-info">
+            <div class="mb-3 border-bottom bg-light p-2">
+                @if (Prescription is null || string.IsNullOrEmpty(Prescription.Id))
+                {
+                    <div class="alert alert-warning mt-3">
+                        Reçete bulunamadı.
+                    </div>
+                }else{
+                    <label class="form-label text-success">Recete Id:</label>
+                    <span class="form-control-plaintext">@Prescription.PrescriptionId</span>
+                }
+            </div>
+            <div class="mb-3 border-bottom bg-light p-2">
+                <div>
+                    <label class="form-label text-success">Hasta Adı:</label>
+                    <span class="form-control-plaintext">@Patient.FullName</span>
+                </div>
+                <label class="form-label text-success">Hasta TC:</label>
+                <div class="d-flex">
+                    <input @bind="Patient.TCId" class="form-control" placeholder="Hasta TC" />
+                    <button @onclick="SearchPatient" class="btn btn-primary ms-2">Ara</button>
+                </div>
+            </div>
+        </div>
+        @if (Prescription is not null && !string.IsNullOrEmpty(Prescription.Id))
+        {
+         <div class="border-bottom bg-light p-2">
+            <h4 class="text-primary">İlaçlar | Tutar: $ @Prescription.Medicines.Sum(x => x.Price)</h4>
+            <ul class="list-group">
+                @foreach (var medicine in Prescription.Medicines)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>₺ @medicine.Price</span>
+                        <span> - </span>
+                        <span>@medicine.Name</span>
+                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveMedicine(medicine.Id)">Sil</button>
+                    </li>
+                }
+            </ul>
+            </div>
+            <div class="form-check">
+                <h5 class="text-secondary">Reçete Durumu</h5>
+                <input class="form-check-input" type="checkbox" id="isCompleteCheckbox" @bind="Prescription.IsCompleted" />
+                <label class="form-check-label" for="isCompleteCheckbox">
+                    Reçete Tamamlandı
+                </label>
+            </div>
+            <div class="mt-4">
+                <button @onclick="UpdatePrescription" class="btn btn-success w-100">Reçete Kuyruğa ekle</button>
+            </div>
+
+        }
+       
+
+        
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3">
+            Giriş yapmanız gerekiyor. Lütfen tekrar giriş yapın.
+        </div>
+    }
+
+</div>
+
+@code{
+    private bool isLoggedIn = false;
+    private Pharmacy ByPharmacy = new Pharmacy();
+    private Prescription Prescription = new();
+    private Patient Patient = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            isLoggedIn = true;
+            ByPharmacy = await PharmacyService.GetPharmacyByIdAsync(token);
+        }
+        else
+        {
+            isLoggedIn = false;
+            ToastService.ShowError("Lütfen giriş yapın.");
+        }
+    }
+
+    private void RemoveMedicine(string id)
+    {
+        Prescription.Medicines.Remove(Prescription.Medicines.First(x => x.Id == id));
+    }
+
+    private async Task SearchPatient()
+    {
+        if (!string.IsNullOrWhiteSpace(Patient.TCId) && Patient.TCId.Length == 11)
+        {
+            var response = await PatientService.GetPatientByTcAsync(Patient.TCId);
+            if (response is null)
+            {
+                ToastService.ShowSuccess("Hasta Bulunamadı.");
+                return;
+            }
+
+            Patient = response;
+            var prescrition = Patient.Prescriptions.First();
+            if (!string.IsNullOrEmpty(prescrition))
+            {
+                Prescription = await PrescriptionService.GetPrescriptionByIdAsync(prescrition);
+            }
+        }
+    }
+
+    private async Task UpdatePrescription()
+    {
+        if (string.IsNullOrEmpty(Patient.Id))
+        {
+            ToastService.ShowError("Hasta Seçimi yapın.");
+            return;
+        }
+
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            ToastService.ShowError("Lütfen giriş yapın.");
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        var response = await PrescriptionService.UpdatePrescriptionAsync(token, Prescription.Id, Prescription);
+        if (response is not null)
+        {
+            Prescription = new();
+            Patient = new();
+            ToastService.ShowSuccess("Reçete kuyruğa eklendi oluşturuldu.");
+        }
+        else
+        {
+            ToastService.ShowError("Reçete kuyruğa eklenirken hata oluştu.");
+        }
+    }
+}
+

@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # API Servisi
+  api:
+    build:
+      context: .
+      dockerfile: DoctorAppointmentSystem.API/Dockerfile
+    ports:
+      - "5000:80" # API'nin 80 portunu 5000'e yönlendiriyoruz
+    environment:
+      - MONGO_CONNECTION_STRING=mongodb+srv://alialpkrl:Alialpkrl1.@doctorapp.ym6no.mongodb.net/?retryWrites=true&w=majority&appName=doctorapp
+      - REDIS_CONNECTION_STRING=redis-13939.c266.us-east-1-3.ec2.redns.redis-cloud.com:13939
+      - RABBITMQ_CONNECTION_STRING=amqps://iafnxgof:xC06OhisygwIE2BTYAbmrUsEwY8lp1Ho@seal.lmq.cloudamqp.com/iafnxgof
+    depends_on:
+      - redis
+      - rabbitmq
+    networks:
+      - doctorapp_network
+
+  # Redis Servisi
+  redis:
+    image: redis:6.0
+    ports:
+      - "6379:6379" # Redis'in varsayılan portunu açıyoruz
+    networks:
+      - doctorapp_network
+
+  # RabbitMQ Servisi
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"  # RabbitMQ Yönetim UI'si için port
+      - "5672:5672"    # RabbitMQ için default port
+    networks:
+      - doctorapp_network
+
+  # Diğer servisler için ekleme yapabilirsiniz (Örneğin: EmailWorker, WorkerService vb.)
+  emailworkerservice:
+    build:
+      context: .
+      dockerfile: DoctorAppointmentSystem.EmailWorkerService/Dockerfile
+    environment:
+      - RABBITMQ_CONNECTION_STRING=amqps://iafnxgof:xC06OhisygwIE2BTYAbmrUsEwY8lp1Ho@seal.lmq.cloudamqp.com/iafnxgof
+    networks:
+      - doctorapp_network
+    depends_on:
+      - rabbitmq
+
+  workerservice:
+    build:
+      context: .
+      dockerfile: DoctorAppointmentSystem.WorkerService/Dockerfile
+    environment:
+      - REDIS_CONNECTION_STRING=redis-13939.c266.us-east-1-3.ec2.redns.redis-cloud.com:13939
+    networks:
+      - doctorapp_network
+    depends_on:
+      - redis
+
+networks:
+  doctorapp_network:
+    driver: bridge

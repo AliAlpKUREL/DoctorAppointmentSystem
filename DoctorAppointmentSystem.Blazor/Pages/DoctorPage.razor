@@ -1,0 +1,193 @@
+﻿@page "/doctor"
+@using MongoDB.Bson
+@inject ILocalStorageService LocalStorage
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject DoctorService DoctorService
+@inject PatientService PatientService
+@inject PrescriptionService PrescriptionService
+@inject MedicineService MedicineService
+
+<div class="container mt-4">
+    <h3 class="text-primary">Merhaba Doktor @ByDoctor.FullName,</h3>
+    <p>Toplam Hasta Sayınız: @ByDoctor.Patients.Count</p>
+
+    <h2 class="my-4 text-info">Reçete Oluştur</h2>
+
+    @if (isLoggedIn)
+    {
+        <div class="card p-4 shadow-sm border-info">
+            <div class="mb-3 border-bottom bg-light p-2">
+                <label class="form-label text-success">Recete Id:</label>
+                <span class="form-control-plaintext">@Prescription.PrescriptionId</span>
+            </div>
+
+            <div class="mb-3 border-bottom bg-light p-2">
+                <div>
+                    <label class="form-label text-success">Hasta Adı:</label>
+                    <span class="form-control-plaintext">@Patient.FullName</span>
+                </div>
+                <label class="form-label text-success">Hasta TC:</label>
+                <div class="d-flex">
+                    <input @bind="Patient.TCId" class="form-control" placeholder="Hasta TC" />
+                    <button @onclick="SearchPatient" class="btn btn-primary ms-2">Ara</button>
+                </div>
+            </div>
+
+            <div class="mb-3 p-3 border-bottom bg-info text-white">
+                <label class="form-label">İlaç Adı:</label>
+                <input @bind="newMedicine.Name" placeholder="İlaç Adı" class="form-control" @oninput="OnMedicineNameChanged" />
+
+                <div class="list-group list-group-flush overflow-scroll" style="max-height:20vh">
+                    @if (suggestedMedicines.Any())
+                    {
+                        @foreach (var medicine in suggestedMedicines)
+                        {
+                            <button class="list-group-item list-group-item-action list-group-item-sm" @onclick="() => AddSuggestedMedicine(medicine)">
+                                @medicine.Name
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <span>Öneri yok</span>
+                    }
+                </div>
+            </div>
+
+            <div class="border-bottom bg-light p-2">
+                <h4 class="text-primary">İlaçlar</h4>
+                <ul class="list-group">
+                    @foreach (var medicine in Medicines)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@medicine.Name</span>
+                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveMedicine(medicine.Id)">Sil</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="mt-4">
+                <button @onclick="CreatePrescription" class="btn btn-success w-100">Reçete Oluştur</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3">
+            Giriş yapmanız gerekiyor. Lütfen tekrar giriş yapın.
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoggedIn = false;
+    private Doctor ByDoctor = new();
+    private Patient Patient = new();
+    private Prescription Prescription = new();
+    private List<Medicine> Medicines = new();
+    private Medicine newMedicine = new();
+    private List<Medicine> suggestedMedicines = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            isLoggedIn = true;
+            ByDoctor = await DoctorService.GetDoctorByIdAsync(token);
+            Prescription.PrescriptionId = ObjectId.GenerateNewId().ToString();
+        }
+        else
+        {
+            isLoggedIn = false;
+            ToastService.ShowError("Lütfen giriş yapın.");
+        }
+    }
+
+    private async Task AddSuggestedMedicine(Medicine medicine)
+    {
+        Medicines.Add(medicine);
+        newMedicine.Name = string.Empty;
+        suggestedMedicines.Clear();
+    }
+
+    private async Task OnMedicineNameChanged(ChangeEventArgs e)
+    {
+        string enteredName = e.Value?.ToString() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(enteredName) && enteredName.Length > 2)
+        {
+            var response = await MedicineService.GetMedicinesByNameAsync(enteredName);
+            if (response is null)
+                return;
+            suggestedMedicines = response.ToList();
+        }
+        else
+        {
+            suggestedMedicines.Clear();
+        }
+    }
+
+    private void RemoveMedicine(string id)
+    {
+        Medicines.Remove(Medicines.First(x => x.Id == id));
+    }
+
+    private async Task SearchPatient()
+    {
+        if (!string.IsNullOrWhiteSpace(Patient.TCId) && Patient.TCId.Length == 11)
+        {
+            var response = await PatientService.GetPatientByTcAsync(Patient.TCId);
+            if (response is null)
+            {
+                ToastService.ShowSuccess("Hasta Bulunamadı.");
+                return;
+            }
+
+            Patient = response;
+        }
+    }
+
+    private async Task CreatePrescription()
+    {
+        if (string.IsNullOrEmpty(Patient.Id))
+        {
+            ToastService.ShowError("Hasta Seçimi yapın.");
+            return;
+        }
+
+        Prescription.DoctorId = ByDoctor.Id;
+        Prescription.PatientId = Patient.Id;
+        Prescription.Medicines = Medicines;
+        Prescription.CreatedAt = DateTime.Now;
+        Prescription.IsCompleted = false;
+        Prescription.Id = ObjectId.GenerateNewId().ToString();
+
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            ToastService.ShowError("Lütfen giriş yapın.");
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        var response = await PrescriptionService.CreatePrescriptionAsync(token, Prescription);
+        if (response is not null)
+        {
+            await DoctorService.AddPatientToDoctorAsync(token, Patient.Id);
+            Prescription = new();
+            Prescription.Id = ObjectId.GenerateNewId().ToString();
+            Prescription.PrescriptionId = ObjectId.GenerateNewId().ToString();
+            Medicines = new();
+            Patient = new();
+            ByDoctor = await DoctorService.GetDoctorByIdAsync(token);
+            ToastService.ShowSuccess("Reçete başarıyla oluşturuldu.");
+        }
+        else
+        {
+            ToastService.ShowError("Reçete oluşturulurken bir hata oluştu.");
+        }
+    }
+}
