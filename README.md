@@ -2,7 +2,8 @@
 
 ## Proje Açıklaması
 Doctor Appointment System, doktorlar, hastalar ve eczacılar arasında reçete yönetimini kolaylaştıran bir sistemdir. Bu proje Blazor WebAssembly ve .NET 8 kullanılarak geliştirilmiştir.
-
+### ** video link**
+-https://youtu.be/hX6CDkNF5V8
 ## Kullanılan Teknolojiler
 - **Blazor WebAssembly (WASM)** - Etkileşimli web arayüzü oluşturmak için kullanılır.
 - **ASP.NET Core** - Kimlik doğrulama ve iş mantığını yöneten backend API.
